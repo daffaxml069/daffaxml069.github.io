@@ -1,57 +1,899 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>daffaxml069 | Portfolio</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>NASA - Deep Space Exploration & Telemetry Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        nasa: {
+                            dark: '#030712',
+                            space: '#0b0d17',
+                            card: '#111827',
+                            blue: '#00f0ff',
+                            red: '#e03c31',
+                            accent: '#3b82f6'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['Courier New', 'Courier', 'monospace'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome & Lucide Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Live Telemetry -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #030712;
+            color: #e5e7eb;
+            overflow-x: hidden;
+        }
+        .glass {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+        }
+        .glass-glow {
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+        }
+        .neon-border {
+            border-color: rgba(0, 240, 255, 0.4);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+        }
+        .text-glow-red {
+            text-shadow: 0 0 10px rgba(224, 60, 49, 0.7);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff;
+        }
+    </style>
 </head>
-<body>
+<body class="font-sans antialiased selection:bg-nasa-blue selection:text-black">
 
-    <header>
-        <nav>
-            <div class="logo">daffa<span>xml069</span></div>
-            <ul>
-                <li><a href="#home">Beranda</a></li>
-                <li><a href="#projects">Proyek</a></li>
-                <li><a href="#contact">Kontak</a></li>
-            </ul>
-        </nav>
+    <canvas id="hero-canvas" class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none"></canvas>
+
+    <header class="sticky top-0 z-50 glass border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo NASA -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="scrollToSection('hero')">
+                    <div class="relative w-12 h-12 flex items-center justify-center rounded-full bg-nasa-red text-white font-black text-xl tracking-tighter shadow-lg shadow-nasa-red/50">
+                        NASA
+                        <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-nasa-blue opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-3 w-3 bg-nasa-blue"></span>
+                        </span>
+                    </div>
+                    <div class="hidden sm:block">
+                        <span class="text-xs text-nasa-blue tracking-widest font-mono block">DEEP SPACE EXPLORATION</span>
+                        <span class="text-lg font-bold tracking-wider text-white">MISSION CONTROL</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Nav -->
+                <nav class="hidden md:flex space-x-6 font-mono text-sm uppercase tracking-wider">
+                    <a href="#solar-system" class="text-gray-300 hover:text-nasa-blue transition-colors flex items-center gap-1"><i class="fa-solid fa-globe text-xs"></i> Tata Surya</a>
+                    <a href="#apod" class="text-gray-300 hover:text-nasa-blue transition-colors flex items-center gap-1"><i class="fa-solid fa-image text-xs"></i> APOD</a>
+                    <a href="#telemetry" class="text-gray-300 hover:text-nasa-blue transition-colors flex items-center gap-1"><i class="fa-solid fa-chart-line text-xs"></i> Telemetri</a>
+                    <a href="#iss-tracker" class="text-gray-300 hover:text-nasa-blue transition-colors flex items-center gap-1"><i class="fa-solid fa-satellite text-xs"></i> ISS Live</a>
+                    <a href="#audio-space" class="text-gray-300 hover:text-nasa-blue transition-colors flex items-center gap-1"><i class="fa-solid fa-headphones text-xs"></i> Audio Space</a>
+                </nav>
+
+                <!-- Status & Search -->
+                <div class="flex items-center space-x-4">
+                    <div class="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 text-xs font-mono">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        DSN LINK: ONLINE
+                    </div>
+                    <button onclick="toggleSearchModal()" class="p-2 text-gray-400 hover:text-nasa-blue transition-colors">
+                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    </button>
+                    <!-- Mobile Hamburger Menu Button -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-gray-400 hover:text-white">
+                        <i id="mobile-menu-icon" class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden glass border-t border-gray-800 px-4 pt-2 pb-4 space-y-3 font-mono text-sm">
+            <a href="#solar-system" onclick="toggleMobileMenu()" class="block py-2 text-gray-300 hover:text-nasa-blue"><i class="fa-solid fa-globe mr-2"></i> Tata Surya</a>
+            <a href="#apod" onclick="toggleMobileMenu()" class="block py-2 text-gray-300 hover:text-nasa-blue"><i class="fa-solid fa-image mr-2"></i> APOD</a>
+            <a href="#telemetry" onclick="toggleMobileMenu()" class="block py-2 text-gray-300 hover:text-nasa-blue"><i class="fa-solid fa-chart-line mr-2"></i> Live Telemetri</a>
+            <a href="#iss-tracker" onclick="toggleMobileMenu()" class="block py-2 text-gray-300 hover:text-nasa-blue"><i class="fa-solid fa-satellite mr-2"></i> ISS Live Tracker</a>
+            <a href="#audio-space" onclick="toggleMobileMenu()" class="block py-2 text-gray-300 hover:text-nasa-blue"><i class="fa-solid fa-headphones mr-2"></i> Audio Space</a>
+        </div>
     </header>
 
-    <section id="home" class="hero">
-        <div class="hero-content">
-            <h1>Halo, Saya <span class="highlight">Daffa</span></h1>
-            <p>Seorang Pengembang yang fokus pada kreativitas dan fungsionalitas kode.</p>
-            <a href="https://github.com/daffaxml069" class="btn">Lihat GitHub</a>
+    <section id="hero" class="relative min-h-[90vh] flex items-center justify-center pt-10 pb-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-5xl mx-auto text-center z-10">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-nasa-blue/30 text-nasa-blue text-xs font-mono uppercase tracking-widest mb-6">
+                <i class="fa-solid fa-rocket animate-bounce"></i> PROGRAM ARTEMIS & MARS DEEP SPACE
+            </div>
+            
+            <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white mb-6">
+                EKSPLORASI TANPA BATAS <br>
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-nasa-blue via-blue-400 to-indigo-500 text-glow">
+                    MENINGGALKAN JEJAK DI BINTANG
+                </span>
+            </h1>
+            
+            <p id="hero-typing" class="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto font-mono h-16 leading-relaxed mb-8">
+                <!-- Text typed by JS -->
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-4 mb-16">
+                <a href="#solar-system" class="px-8 py-3.5 rounded-lg bg-nasa-blue text-black font-bold uppercase tracking-wider hover:bg-cyan-300 transition-all shadow-lg shadow-nasa-blue/20 flex items-center gap-2">
+                    <i class="fa-solid fa-compass"></i> Jelajah Tata Surya
+                </a>
+                <a href="#telemetry" class="px-8 py-3.5 rounded-lg glass text-white font-bold uppercase tracking-wider hover:border-nasa-blue transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-terminal"></i> Telemetri Misi
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <div class="glass p-5 rounded-xl border-l-4 border-nasa-blue">
+                    <div class="text-xs font-mono text-gray-400 uppercase">Jarak Voyager 1</div>
+                    <div class="text-2xl sm:text-3xl font-bold font-mono text-nasa-blue mt-1" id="stat-voyager">24,380,120,400 KM</div>
+                    <div class="text-[10px] text-emerald-400 font-mono mt-1"><i class="fa-solid fa-arrow-up-right"></i> Bertambah +61,000 km/j</div>
+                </div>
+                <div class="glass p-5 rounded-xl border-l-4 border-indigo-500">
+                    <div class="text-xs font-mono text-gray-400 uppercase">Eksoplanet Terkonfirmasi</div>
+                    <div class="text-2xl sm:text-3xl font-bold font-mono text-indigo-400 mt-1" id="stat-exoplanets">5,595</div>
+                    <div class="text-[10px] text-gray-400 font-mono mt-1">Sistem Kepler & TESS</div>
+                </div>
+                <div class="glass p-5 rounded-xl border-l-4 border-nasa-red">
+                    <div class="text-xs font-mono text-gray-400 uppercase">Kecepatan Orbit ISS</div>
+                    <div class="text-2xl sm:text-3xl font-bold font-mono text-nasa-red mt-1" id="stat-iss-speed">27,600 KM/JAM</div>
+                    <div class="text-[10px] text-nasa-blue font-mono mt-1">Orbit Bumi Rendah (LEO)</div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <section id="projects">
-        <h2>Proyek Terbaru</h2>
-        <div class="project-grid">
-            <div class="card">
-                <h3>Repo Utama</h3>
-                <p>Koleksi script dan konfigurasi terbaik dalam repositori daffaxml069.</p>
-                <span class="tag">System</span>
+    <section id="solar-system" class="py-20 px-4 sm:px-6 lg:px-8 border-t border-gray-800 bg-nasa-dark/60">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-xs font-mono text-nasa-blue uppercase tracking-widest">INTERACTIVE SPACE SIMULATOR</h2>
+                <h3 class="text-3xl sm:text-4xl font-bold text-white mt-2">Jelajah Planet Tata Surya</h3>
+                <p class="text-gray-400 mt-2">Klik planet untuk memuat data analisis geologi & simulasi orbit real-time.</p>
             </div>
-            <div class="card">
-                <h3>Web App</h3>
-                <p>Aplikasi web interaktif dengan performa tinggi dan desain modern.</p>
-                <span class="tag">Frontend</span> <span class="tag">Backend</span>
-            </div>
-            <div class="card">
-                <h3>Automation</h3>
-                <p>Skrip otomatisasi untuk mempermudah alur kerja harian.</p>
-                <span class="tag">Tools</span>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                <!-- Canvas Simulator -->
+                <div class="lg:col-span-2 glass rounded-2xl p-4 relative overflow-hidden flex flex-col items-center">
+                    <div class="w-full flex justify-between items-center mb-4 px-2">
+                        <span class="text-xs font-mono text-nasa-blue"><i class="fa-solid fa-circle-notch animate-spin"></i> SIMULATOR VIRTUAL ORBIT</span>
+                        <div class="flex gap-2">
+                            <button onclick="setSimSpeed(1)" class="px-2 py-1 text-xs glass font-mono rounded text-nasa-blue hover:bg-nasa-blue/20">1x Speed</button>
+                            <button onclick="setSimSpeed(3)" class="px-2 py-1 text-xs glass font-mono rounded text-nasa-blue hover:bg-nasa-blue/20">3x Speed</button>
+                        </div>
+                    </div>
+                    <div class="relative w-full aspect-square max-h-[500px]">
+                        <canvas id="solar-canvas" class="w-full h-full rounded-xl cursor-pointer"></canvas>
+                    </div>
+                    <div class="text-xs text-gray-400 font-mono mt-3 text-center">
+                        <i class="fa-solid fa-hand-pointer"></i> Klik planet pada canvas atau pilih dari daftar untuk analisis detail
+                    </div>
+                </div>
+
+                <!-- Planet Information Panel -->
+                <div class="glass rounded-2xl p-6 border-l-4 border-nasa-blue flex flex-col justify-between h-full">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <span class="text-xs font-mono text-nasa-blue" id="planet-type">PLANET TERESTRIAL</span>
+                                <h4 class="text-3xl font-extrabold text-white mt-1" id="planet-name">Bumi (Earth)</h4>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-mono bg-nasa-blue/20 text-nasa-blue border border-nasa-blue/40" id="planet-tag">HABITABLE ZONE</span>
+                        </div>
+
+                        <p class="text-sm text-gray-300 leading-relaxed mb-6" id="planet-desc">
+                            Bumi adalah planet ketiga dari Matahari dan satu-satunya objek astronomi yang diketahui menampung kehidupan. Memiliki atmosfer kaya oksigen dan samudra air cair.
+                        </p>
+
+                        <!-- Stats List -->
+                        <div class="space-y-3 font-mono text-sm">
+                            <div class="flex justify-between border-b border-gray-800 pb-2">
+                                <span class="text-gray-400">Jarak Matahari:</span>
+                                <span class="text-white font-bold" id="planet-distance">149.6 Juta KM</span>
+                            </div>
+                            <div class="flex justify-between border-b border-gray-800 pb-2">
+                                <span class="text-gray-400">Diameter:</span>
+                                <span class="text-white font-bold" id="planet-diameter">12,742 KM</span>
+                            </div>
+                            <div class="flex justify-between border-b border-gray-800 pb-2">
+                                <span class="text-gray-400">Periode Orbit:</span>
+                                <span class="text-white font-bold" id="planet-orbit">365.25 Hari</span>
+                            </div>
+                            <div class="flex justify-between border-b border-gray-800 pb-2">
+                                <span class="text-gray-400">Suhu Rata-rata:</span>
+                                <span class="text-white font-bold" id="planet-temp">15°C</span>
+                            </div>
+                            <div class="flex justify-between border-b border-gray-800 pb-2">
+                                <span class="text-gray-400">Jumlah Satelit:</span>
+                                <span class="text-white font-bold" id="planet-moons">1 (Bulan)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Planet Selector Selector -->
+                    <div class="mt-6 pt-4 border-t border-gray-800">
+                        <label class="block text-xs font-mono text-gray-400 mb-2">PILIH PLANET / OBJEK:</label>
+                        <div class="grid grid-cols-4 gap-2" id="planet-selector-buttons">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <footer>
-        <p>&copy; 2026 daffaxml069. Dibuat dengan disambi ngopi.</p>
+    <section id="apod" class="py-20 px-4 sm:px-6 lg:px-8 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
+                <div>
+                    <h2 class="text-xs font-mono text-nasa-blue uppercase tracking-widest">ASTRONOMY PICTURE OF THE DAY</h2>
+                    <h3 class="text-3xl sm:text-4xl font-bold text-white mt-2">Gambar Astronomi Hari Ini</h3>
+                </div>
+                <div class="mt-4 md:mt-0 flex items-center gap-3">
+                    <label for="apod-date" class="text-xs font-mono text-gray-400">PILIH TANGGAL:</label>
+                    <input type="date" id="apod-date" class="bg-nasa-card text-nasa-blue border border-nasa-blue/40 rounded px-3 py-1.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-nasa-blue">
+                    <button onclick="fetchAPOD()" class="px-4 py-1.5 bg-nasa-blue text-black font-mono text-sm font-bold rounded hover:bg-cyan-300">MUAT</button>
+                </div>
+            </div>
+
+            <div class="glass rounded-2xl overflow-hidden border border-gray-800 grid grid-cols-1 lg:grid-cols-2">
+                <!-- APOD Visual -->
+                <div class="relative group min-h-[350px] bg-black flex items-center justify-center">
+                    <img id="apod-img" src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200" alt="APOD NASA" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+                        <a id="apod-hd" href="#" target="_blank" class="px-4 py-2 bg-nasa-blue text-black font-mono font-bold text-xs rounded shadow flex items-center gap-2">
+                            <i class="fa-solid fa-expand"></i> VIEW FULL HD RESOLUTION
+                        </a>
+                    </div>
+                </div>
+
+                <!-- APOD Content -->
+                <div class="p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 text-xs font-mono text-nasa-blue mb-2">
+                            <i class="fa-regular fa-calendar"></i> <span id="apod-date-display">2026-10-05</span>
+                            <span class="text-gray-600">•</span>
+                            <span id="apod-copyright" class="text-gray-400">Hak Cipta: NASA / JPL</span>
+                        </div>
+                        <h4 id="apod-title" class="text-2xl font-bold text-white mb-4">Carina Nebula in Deep Infrared Spectrum</h4>
+                        <p id="apod-explanation" class="text-gray-300 text-sm leading-relaxed mb-6 font-sans">
+                            Kamera inframerah jarak dekat Teleskop Luar Angkasa James Webb mengungkapkan wilayah kelahiran bintang yang sebelumnya tidak terlihat di Nebula Carina. Dikenal sebagai Cosmic Cliffs, gambaran menakjubkan ini menampilkan puncak-puncak berbatu yang diterangi oleh radiasi ultraviolet intens dari bintang-bintang muda.
+                        </p>
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-800 flex items-center justify-between">
+                        <div class="flex gap-2">
+                            <button onclick="shareAPOD()" class="p-2 glass rounded hover:text-nasa-blue text-xs font-mono text-gray-400 flex items-center gap-1">
+                                <i class="fa-solid fa-share-nodes"></i> Bagikan
+                            </button>
+                        </div>
+                        <span class="text-[10px] font-mono text-gray-500">SOURCE: NASA APOD API SERVICE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="telemetry" class="py-20 px-4 sm:px-6 lg:px-8 border-t border-gray-800 bg-nasa-dark/60">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-xs font-mono text-nasa-blue uppercase tracking-widest">MISSION CONTROL DASHBOARD</h2>
+                <h3 class="text-3xl sm:text-4xl font-bold text-white mt-2">Live Telemetri & Hitung Mundur Peluncuran</h3>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Rocket Launch Countdown Widget -->
+                <div class="glass rounded-2xl p-6 border-t-4 border-nasa-red flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-xs font-mono text-nasa-red flex items-center gap-1">
+                                <span class="w-2 h-2 rounded-full bg-nasa-red animate-ping"></span> NEXT LAUNCH
+                            </span>
+                            <span class="text-xs font-mono text-gray-400">KENNEDY SPACE CENTER</span>
+                        </div>
+
+                        <h4 class="text-xl font-bold text-white mb-1">Artemis IV - Lunar Gateway Module</h4>
+                        <p class="text-xs text-gray-400 font-mono mb-6">Roket: SLS Block 1B Heavy Payload</p>
+
+                        <!-- Timer Box -->
+                        <div class="grid grid-cols-4 gap-2 text-center my-6">
+                            <div class="bg-black/60 p-3 rounded-lg border border-gray-800">
+                                <div id="timer-days" class="text-2xl sm:text-3xl font-mono font-bold text-white">04</div>
+                                <div class="text-[10px] font-mono text-gray-400 mt-1">HARI</div>
+                            </div>
+                            <div class="bg-black/60 p-3 rounded-lg border border-gray-800">
+                                <div id="timer-hours" class="text-2xl sm:text-3xl font-mono font-bold text-white">12</div>
+                                <div class="text-[10px] font-mono text-gray-400 mt-1">JAM</div>
+                            </div>
+                            <div class="bg-black/60 p-3 rounded-lg border border-gray-800">
+                                <div id="timer-mins" class="text-2xl sm:text-3xl font-mono font-bold text-white">45</div>
+                                <div class="text-[10px] font-mono text-gray-400 mt-1">MENIT</div>
+                            </div>
+                            <div class="bg-black/60 p-3 rounded-lg border border-gray-800">
+                                <div id="timer-secs" class="text-2xl sm:text-3xl font-mono font-bold text-nasa-blue">30</div>
+                                <div class="text-[10px] font-mono text-gray-400 mt-1">DETIK</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 font-mono text-xs text-gray-400 border-t border-gray-800 pt-4">
+                        <div class="flex justify-between"><span>Status Cuaca Pad 39B:</span><span class="text-emerald-400">GO (90%)</span></div>
+                        <div class="flex justify-between"><span>Injeksi Bahan Bakar LOX/LH2:</span><span class="text-yellow-400">SIAP</span></div>
+                        <button onclick="playLaunchAlert()" class="w-full mt-3 py-2 bg-nasa-red/20 border border-nasa-red text-nasa-red font-bold rounded hover:bg-nasa-red hover:text-white transition-all text-center">
+                            <i class="fa-solid fa-bell"></i> SETING PERINGATAN LAUNCH
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Telemetry Graph Chart -->
+                <div class="lg:col-span-2 glass rounded-2xl p-6 border border-gray-800">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
+                        <div>
+                            <span class="text-xs font-mono text-nasa-blue">DEEP SPACE NETWORK (DSN) REAL-TIME TELEMETRY</span>
+                            <h4 class="text-lg font-bold text-white">Sinyal Gelombang & Beban Data Stasiun Earth-Goldstone</h4>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-mono text-emerald-400"><i class="fa-solid fa-signal"></i> 8.4 GHz X-Band</span>
+                        </div>
+                    </div>
+
+                    <div class="h-64 w-full">
+                        <canvas id="telemetryChart"></canvas>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-800 font-mono text-center">
+                        <div>
+                            <div class="text-[10px] text-gray-400">LATENSI SINYAL</div>
+                            <div class="text-sm font-bold text-nasa-blue" id="tele-latency">1.28 Detik</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-gray-400">SIGNAL NOISE RATIO</div>
+                            <div class="text-sm font-bold text-emerald-400" id="tele-snr">48.2 dB</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-gray-400">BITRATE DOWNLINK</div>
+                            <div class="text-sm font-bold text-indigo-400" id="tele-bitrate">2.4 Mbps</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="iss-tracker" class="py-20 px-4 sm:px-6 lg:px-8 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-xs font-mono text-nasa-blue uppercase tracking-widest">ORBITAL TRACKING SYSTEM</h2>
+                <h3 class="text-3xl sm:text-4xl font-bold text-white mt-2">Pelacak Real-Time Stasiun Luar Angkasa ISS</h3>
+            </div>
+
+            <div class="glass rounded-2xl p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Map / Tracker Display -->
+                <div class="lg:col-span-2 relative bg-gray-950 rounded-xl overflow-hidden border border-gray-800 min-h-[350px] flex items-center justify-center">
+                    <!-- Custom SVG World Map Canvas Representation -->
+                    <canvas id="iss-map-canvas" class="w-full h-full object-cover"></canvas>
+                    
+                    <div class="absolute top-4 left-4 glass px-3 py-1.5 rounded text-xs font-mono text-nasa-blue border border-nasa-blue/30 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-nasa-blue animate-ping"></span> ISS NORAD ID: 25544
+                    </div>
+                </div>
+
+                <!-- ISS Telemetry Data -->
+                <div class="flex flex-col justify-between space-y-6">
+                    <div>
+                        <h4 class="text-xl font-bold text-white mb-2">Status Stasiun Luar Angkasa</h4>
+                        <p class="text-xs text-gray-400 mb-6">Mengorbit Bumi setiap 90 menit pada ketinggian rata-rata 420 kilometer.</p>
+
+                        <div class="space-y-4 font-mono">
+                            <div class="p-3 bg-black/40 rounded-lg border border-gray-800">
+                                <div class="text-[10px] text-gray-400">LATITUD</div>
+                                <div class="text-xl font-bold text-white" id="iss-lat">-24.5231° S</div>
+                            </div>
+                            <div class="p-3 bg-black/40 rounded-lg border border-gray-800">
+                                <div class="text-[10px] text-gray-400">LONGITUD</div>
+                                <div class="text-xl font-bold text-white" id="iss-lng">118.9120° E</div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="p-3 bg-black/40 rounded-lg border border-gray-800">
+                                    <div class="text-[10px] text-gray-400">KETINGGIAN</div>
+                                    <div class="text-sm font-bold text-nasa-blue" id="iss-alt">418.4 KM</div>
+                                </div>
+                                <div class="p-3 bg-black/40 rounded-lg border border-gray-800">
+                                    <div class="text-[10px] text-gray-400">KRU AKTIF</div>
+                                    <div class="text-sm font-bold text-emerald-400">7 Astronaut</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="updateISSCoordinates()" class="w-full py-3 bg-nasa-blue/10 border border-nasa-blue text-nasa-blue font-mono text-xs font-bold rounded-lg hover:bg-nasa-blue hover:text-black transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate"></i> REFRESH KOORDINAT MANUAL
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="audio-space" class="py-20 px-4 sm:px-6 lg:px-8 border-t border-gray-800 bg-nasa-dark/60">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-xs font-mono text-nasa-blue uppercase tracking-widest">COSMIC AUDIO ARCHIVE</h2>
+                <h3 class="text-3xl sm:text-4xl font-bold text-white mt-2">Suara Gelombang Luar Angkasa</h3>
+                <p class="text-gray-400 mt-2">Dengarkan konversi frekuensi radio planet dan rekaman bersejarah misi NASA.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Track 1 -->
+                <div class="glass p-6 rounded-xl border border-gray-800 hover:border-nasa-blue transition-all">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 rounded-full bg-nasa-blue/20 flex items-center justify-center text-nasa-blue">
+                            <i class="fa-solid fa-wind"></i>
+                        </div>
+                        <span class="text-[10px] font-mono text-gray-400">PERSEVERANCE ROVER</span>
+                    </div>
+                    <h4 class="font-bold text-white">Suara Angin Mars</h4>
+                    <p class="text-xs text-gray-400 mt-1 mb-4">Rekaman mikrofon asli dari Kawah Jezero di planet Mars.</p>
+                    <button onclick="playSpaceAudio('mars')" class="w-full py-2 glass border-nasa-blue/40 text-nasa-blue font-mono text-xs rounded hover:bg-nasa-blue hover:text-black transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play" id="icon-mars"></i> Putar Audio Synthesizer
+                    </button>
+                </div>
+
+                <!-- Track 2 -->
+                <div class="glass p-6 rounded-xl border border-gray-800 hover:border-nasa-blue transition-all">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                            <i class="fa-solid fa-wave-square"></i>
+                        </div>
+                        <span class="text-[10px] font-mono text-gray-400">RADIO TELESCOPE</span>
+                    </div>
+                    <h4 class="font-bold text-white">Sinyal Pulsar PSR B1919+21</h4>
+                    <p class="text-xs text-gray-400 mt-1 mb-4">Frekuensi ritmis dari bintang neutron yang berputar cepat.</p>
+                    <button onclick="playSpaceAudio('pulsar')" class="w-full py-2 glass border-indigo-500/40 text-indigo-400 font-mono text-xs rounded hover:bg-indigo-500 hover:text-white transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play" id="icon-pulsar"></i> Putar Audio Synthesizer
+                    </button>
+                </div>
+
+                <!-- Track 3 -->
+                <div class="glass p-6 rounded-xl border border-gray-800 hover:border-nasa-blue transition-all">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 rounded-full bg-nasa-red/20 flex items-center justify-center text-nasa-red">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
+                        <span class="text-[10px] font-mono text-gray-400">APOLLO 11 HISTORIC</span>
+                    </div>
+                    <h4 class="font-bold text-white">Transmisi Apollo 11 (1969)</h4>
+                    <p class="text-xs text-gray-400 mt-1 mb-4">"One small step for man, one giant leap for mankind."</p>
+                    <button onclick="playSpaceAudio('apollo')" class="w-full py-2 glass border-nasa-red/40 text-nasa-red font-mono text-xs rounded hover:bg-nasa-red hover:text-white transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play" id="icon-apollo"></i> Putar Audio Synthesizer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="border-t border-gray-800 glass py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-nasa-red text-white font-black text-sm flex items-center justify-center">NASA</div>
+                <span class="text-xs font-mono text-gray-400">National Aeronautics and Space Administration • Official Space Portal Concept</span>
+            </div>
+            <div class="text-xs font-mono text-gray-500 text-center md:text-right">
+                <p>Data disediakan simulasi real-time API NASA.</p>
+                <p class="mt-1">&copy; 2026 NASA Space Exploration Exploration Portal.</p>
+            </div>
+        </div>
     </footer>
 
+    <!-- Search Modal -->
+    <div id="search-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass max-w-xl w-full rounded-2xl p-6 border border-nasa-blue/40">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold font-mono text-nasa-blue"><i class="fa-solid fa-magnifying-glass"></i> Cari Arsip NASA</h3>
+                <button onclick="toggleSearchModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <input type="text" id="search-input" placeholder="Ketik kata kunci (contoh: Mars, James Webb, Supernova)..." class="w-full bg-black/60 border border-gray-700 rounded-lg p-3 text-white font-mono text-sm focus:outline-none focus:border-nasa-blue mb-4">
+            <div id="search-results" class="max-h-60 overflow-y-auto space-y-2 font-mono text-xs">
+                <div class="p-2 text-gray-500">Ketik kata kunci untuk memulai pencarian...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 glass border-l-4 border-nasa-blue px-4 py-3 rounded-lg text-sm font-mono text-white hidden z-50 shadow-xl flex items-center gap-3">
+        <i class="fa-solid fa-circle-info text-nasa-blue"></i>
+        <span id="toast-message">Pesan notifikasi</span>
+    </div>
+
+    <script>
+        let simSpeed = 1;
+        let activeAudioTrack = null;
+        let audioCtx = null;
+
+        // Data Planet
+        const planetData = {
+            mercury: { name: "Merkurius", type: "Terestrial", tag: "EXTREME TEMP", desc: "Planet terdekat dengan Matahari, memiliki permukaan penuh kawah mirip Bulan tanpa atmosfer tebal.", distance: "57.9 Juta KM", diameter: "4,879 KM", orbit: "88 Hari", temp: "-180°C s/d 430°C", moons: "0", color: "#a1a1aa", radius: 5, speed: 0.04, orbitRadius: 40 },
+            venus: { name: "Venus", type: "Terestrial", tag: "HOTTEST PLANET", desc: "Planet terpanas di Tata Surya dengan atmosfer CO2 super tebal dan efek rumah kaca ekstrem.", distance: "108.2 Juta KM", diameter: "12,104 KM", orbit: "225 Hari", temp: "462°C", moons: "0", color: "#f59e0b", radius: 8, speed: 0.025, orbitRadius: 65 },
+            earth: { name: "Bumi", type: "Terestrial", tag: "HABITABLE ZONE", desc: "Bumi adalah planet ketiga dari Matahari dan satu-satunya tempat yang terbukti memiliki kehidupan.", distance: "149.6 Juta KM", diameter: "12,742 KM", orbit: "365.25 Hari", temp: "15°C", moons: "1 (Bulan)", color: "#3b82f6", radius: 9, speed: 0.015, orbitRadius: 95 },
+            mars: { name: "Mars", type: "Terestrial", tag: "TARGET COLONY", desc: "Planet Merah yang kaya dengan besi oksida di permukaannya. Memiliki gunung tertinggi Olympus Mons.", distance: "227.9 Juta KM", diameter: "6,779 KM", orbit: "687 Hari", temp: "-63°C", moons: "2 (Phobos, Deimos)", color: "#ef4444", radius: 7, speed: 0.01, orbitRadius: 130 },
+            jupiter: { name: "Jupiter", type: "Raksasa Gas", tag: "GAS GIANT", desc: "Planet terbesar di Tata Surya dengan Bintik Merah Raksasa yang merupakan badai berabad-abad.", distance: "778.5 Juta KM", diameter: "139,820 KM", orbit: "12 Tahun", temp: "-110°C", moons: "95 Satelit", color: "#d97706", radius: 18, speed: 0.007, orbitRadius: 175 },
+            saturn: { name: "Saturnus", type: "Raksasa Gas", tag: "RING SYSTEM", desc: "Dikenal dengan sistem cincin es spektakuler yang mengelilingi planet raksasa gas ini.", distance: "1.4 Miliar KM", diameter: "116,460 KM", orbit: "29 Tahun", temp: "-140°C", moons: "146 Satelit", color: "#fde047", radius: 15, speed: 0.004, orbitRadius: 220, ring: true },
+            uranus: { name: "Uranus", type: "Raksasa Es", tag: "ICE GIANT", desc: "Planet es dengan sumbu rotasi miring ekstrem hingga 98 derajat, berotasi menyamping.", distance: "2.9 Miliar KM", diameter: "50,724 KM", orbit: "84 Tahun", temp: "-195°C", moons: "28 Satelit", color: "#06b6d4", radius: 12, speed: 0.002, orbitRadius: 255 },
+            neptune: { name: "Neptunus", type: "Raksasa Es", tag: "SUPERSONIC WINDS", desc: "Planet paling luar di Tata Surya dengan angin supersonik mencapai kecepatan 2,100 km/jam.", distance: "4.5 Miliar KM", diameter: "49,244 KM", orbit: "165 Tahun", temp: "-200°C", moons: "16 Satelit", color: "#2563eb", radius: 11, speed: 0.001, orbitRadius: 285 }
+        };
+
+        let selectedPlanetKey = 'earth';
+
+        const heroCanvas = document.getElementById('hero-canvas');
+        const heroCtx = heroCanvas.getContext('2d');
+        let stars = [];
+
+        function resizeHeroCanvas() {
+            heroCanvas.width = window.innerWidth;
+            heroCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeHeroCanvas);
+        resizeHeroCanvas();
+
+        for (let i = 0; i < 200; i++) {
+            stars.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                radius: Math.random() * 1.5,
+                alpha: Math.random(),
+                speed: Math.random() * 0.02
+            });
+        }
+
+        function animateHero() {
+            heroCtx.clearRect(0, 0, heroCanvas.width, heroCanvas.height);
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0) star.speed = -star.speed;
+                heroCtx.beginPath();
+                heroCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                heroCtx.fillStyle = `rgba(255, 255, 255, ${Math.abs(star.alpha)})`;
+                heroCtx.fill();
+            });
+            requestAnimationFrame(animateHero);
+        }
+        animateHero();
+
+        const typingText = "Selamat datang di Portal Komando NASA. Memantau telemetri real-time, penjelajahan planet, gambar luar angkasa harian, serta pelacak orbital terpadu.";
+        let typingIdx = 0;
+        function typeWriter() {
+            if (typingIdx < typingText.length) {
+                document.getElementById("hero-typing").innerHTML += typingText.charAt(typingIdx);
+                typingIdx++;
+                setTimeout(typeWriter, 30);
+            }
+        }
+        typeWriter();
+
+        const solarCanvas = document.getElementById('solar-canvas');
+        const solarCtx = solarCanvas.getContext('2d');
+        let orbitAngles = {};
+
+        Object.keys(planetData).forEach(k => orbitAngles[k] = Math.random() * Math.PI * 2);
+
+        function drawSolarSystem() {
+            const width = solarCanvas.width = solarCanvas.parentElement.clientWidth;
+            const height = solarCanvas.height = solarCanvas.parentElement.clientHeight;
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            solarCtx.clearRect(0, 0, width, height);
+
+            // Sun
+            solarCtx.beginPath();
+            solarCtx.arc(centerX, centerY, 22, 0, Math.PI * 2);
+            solarCtx.fillStyle = '#f59e0b';
+            solarCtx.shadowBlur = 25;
+            solarCtx.shadowColor = '#f59e0b';
+            solarCtx.fill();
+            solarCtx.shadowBlur = 0;
+
+            // Scale orbit to fit screen
+            const maxRadius = 290;
+            const scale = (Math.min(width, height) / 2 - 25) / maxRadius;
+
+            Object.keys(planetData).forEach(key => {
+                const planet = planetData[key];
+                const r = planet.orbitRadius * scale;
+
+                // Orbit path
+                solarCtx.beginPath();
+                solarCtx.arc(centerX, centerY, r, 0, Math.PI * 2);
+                solarCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                solarCtx.stroke();
+
+                // Update Angle
+                orbitAngles[key] += planet.speed * simSpeed * 0.5;
+                const x = centerX + Math.cos(orbitAngles[key]) * r;
+                const y = centerY + Math.sin(orbitAngles[key]) * r;
+
+                // Rings for Saturn
+                if (planet.ring) {
+                    solarCtx.beginPath();
+                    solarCtx.ellipse(x, y, planet.radius * 1.8, planet.radius * 0.6, Math.PI / 4, 0, Math.PI * 2);
+                    solarCtx.strokeStyle = 'rgba(253, 224, 71, 0.5)';
+                    solarCtx.stroke();
+                }
+
+                // Planet Body
+                solarCtx.beginPath();
+                solarCtx.arc(x, y, planet.radius, 0, Math.PI * 2);
+                solarCtx.fillStyle = planet.color;
+                if (key === selectedPlanetKey) {
+                    solarCtx.shadowBlur = 15;
+                    solarCtx.shadowColor = '#00f0ff';
+                }
+                solarCtx.fill();
+                solarCtx.shadowBlur = 0;
+            });
+
+            requestAnimationFrame(drawSolarSystem);
+        }
+        drawSolarSystem();
+
+        function populatePlanetButtons() {
+            const container = document.getElementById('planet-selector-buttons');
+            container.innerHTML = '';
+            Object.keys(planetData).forEach(key => {
+                const p = planetData[key];
+                const btn = document.createElement('button');
+                btn.className = `p-2 text-xs font-mono rounded border text-center transition-all ${key === selectedPlanetKey ? 'bg-nasa-blue text-black border-nasa-blue font-bold' : 'glass text-gray-300 border-gray-800 hover:border-nasa-blue'}`;
+                btn.innerText = p.name;
+                btn.onclick = () => selectPlanet(key);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectPlanet(key) {
+            selectedPlanetKey = key;
+            const p = planetData[key];
+            document.getElementById('planet-name').innerText = p.name;
+            document.getElementById('planet-type').innerText = p.type;
+            document.getElementById('planet-tag').innerText = p.tag;
+            document.getElementById('planet-desc').innerText = p.desc;
+            document.getElementById('planet-distance').innerText = p.distance;
+            document.getElementById('planet-diameter').innerText = p.diameter;
+            document.getElementById('planet-orbit').innerText = p.orbit;
+            document.getElementById('planet-temp').innerText = p.temp;
+            document.getElementById('planet-moons').innerText = p.moons;
+            populatePlanetButtons();
+            showToast(`Planet dipilih: ${p.name}`);
+        }
+
+        function setSimSpeed(speed) {
+            simSpeed = speed;
+            showToast(`Kecepatan simulasi: ${speed}x`);
+        }
+
+        populatePlanetButtons();
+
+        function fetchAPOD() {
+            const dateInput = document.getElementById('apod-date').value;
+            showToast('Memuat Gambar APOD NASA...');
+            
+            // Default mock update for seamless UX demo
+            setTimeout(() => {
+                document.getElementById('apod-title').innerText = "W40 Stellar Nursery Nebula";
+                document.getElementById('apod-date-display').innerText = dateInput || "2026-10-05";
+                document.getElementById('apod-explanation').innerText = "Awan molekul raksasa W40 yang terletak 1.400 tahun cahaya dari Bumi, difoto dalam gelombang inframerah. Bintang-bintang massal baru terbentuk di bagian inti nebula ini.";
+                document.getElementById('apod-img').src = "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=1200";
+            }, 600);
+        }
+
+        function shareAPOD() {
+            const url = window.location.href;
+            const tempInput = document.createElement('input');
+            document.body.appendChild(tempInput);
+            tempInput.value = url;
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast('Tautan APOD berhasil disalin ke clipboard!');
+        }
+
+        const ctxChart = document.getElementById('telemetryChart').getContext('2d');
+        const telemetryChart = new Chart(ctxChart, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '00:05', '00:10', '00:15', '00:20', '00:25', '00:30'],
+                datasets: [{
+                    label: 'Sinyal Downlink DSN (GHz)',
+                    data: [8.41, 8.42, 8.39, 8.45, 8.40, 8.43, 8.44],
+                    borderColor: '#00f0ff',
+                    backgroundColor: 'rgba(0, 240, 255, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#6b7280' }, grid: { color: '#1f2937' } },
+                    y: { ticks: { color: '#6b7280' }, grid: { color: '#1f2937' } }
+                }
+            }
+        });
+
+        // Dynamic Chart Update
+        setInterval(() => {
+            const newVal = (8.38 + Math.random() * 0.08).toFixed(2);
+            telemetryChart.data.datasets[0].data.shift();
+            telemetryChart.data.datasets[0].data.push(newVal);
+            telemetryChart.update('none');
+
+            document.getElementById('tele-snr').innerText = (45 + Math.random() * 5).toFixed(1) + ' dB';
+            document.getElementById('tele-bitrate').innerText = (2.1 + Math.random() * 0.6).toFixed(1) + ' Mbps';
+        }, 2000);
+
+        const issCanvas = document.getElementById('iss-map-canvas');
+        const issCtx = issCanvas.getContext('2d');
+
+        function drawISSMap() {
+            issCanvas.width = issCanvas.parentElement.clientWidth;
+            issCanvas.height = issCanvas.parentElement.clientHeight;
+            const w = issCanvas.width;
+            const h = issCanvas.height;
+
+            issCtx.fillStyle = '#030712';
+            issCtx.fillRect(0, 0, w, h);
+
+            // Grid Lines
+            issCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            for (let x = 0; x < w; x += 40) {
+                issCtx.beginPath(); issCtx.moveTo(x, 0); issCtx.lineTo(x, h); issCtx.stroke();
+            }
+            for (let y = 0; y < h; y += 40) {
+                issCtx.beginPath(); issCtx.moveTo(0, y); issCtx.lineTo(w, y); issCtx.stroke();
+            }
+
+            // Simulated ISS Position
+            const time = Date.now() * 0.0005;
+            const issX = (w / 2) + Math.sin(time) * (w * 0.35);
+            const issY = (h / 2) + Math.cos(time * 1.5) * (h * 0.25);
+
+            // Orbit Path
+            issCtx.beginPath();
+            issCtx.strokeStyle = 'rgba(0, 240, 255, 0.3)';
+            issCtx.setLineDash([5, 5]);
+            issCtx.arc(w / 2, h / 2, w * 0.3, 0, Math.PI * 2);
+            issCtx.stroke();
+            issCtx.setLineDash([]);
+
+            // ISS Icon Glow
+            issCtx.beginPath();
+            issCtx.arc(issX, issY, 8, 0, Math.PI * 2);
+            issCtx.fillStyle = '#00f0ff';
+            issCtx.shadowBlur = 15;
+            issCtx.shadowColor = '#00f0ff';
+            issCtx.fill();
+            issCtx.shadowBlur = 0;
+
+            requestAnimationFrame(drawISSMap);
+        }
+        drawISSMap();
+
+        function updateISSCoordinates() {
+            const lat = (Math.random() * 100 - 50).toFixed(4);
+            const lng = (Math.random() * 360 - 180).toFixed(4);
+            document.getElementById('iss-lat').innerText = `${lat}° ${lat >= 0 ? 'N' : 'S'}`;
+            document.getElementById('iss-lng').innerText = `${lng}° ${lng >= 0 ? 'E' : 'W'}`;
+            showToast('Koordinat ISS Diperbarui dari Telemetri NORAD!');
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSpaceAudio(type) {
+            initAudio();
+            showToast(`Memutar audio synth luar angkasa: ${type.toUpperCase()}`);
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'mars') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(80, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 1.5);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2);
+            } else if (type === 'pulsar') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            } else if (type === 'apollo') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.8);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+            }
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 2);
+        }
+
+        function playLaunchAlert() {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+            showToast('Peringatan Peluncuran Artemis Ditambahkan ke Kalender!');
+        }
+
+        function toggleSearchModal() {
+            const modal = document.getElementById('search-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
 </body>
 </html>
