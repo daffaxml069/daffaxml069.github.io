@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NASA - Deep Space Exploration & Telemetry Portal</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -29,9 +28,7 @@
             }
         }
     </script>
-    <!-- FontAwesome & Lucide Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js for Live Telemetry -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -58,7 +55,6 @@
         .text-glow-red {
             text-shadow: 0 0 10px rgba(224, 60, 49, 0.7);
         }
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -82,7 +78,6 @@
     <header class="sticky top-0 z-50 glass border-b border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
-                <!-- Logo NASA -->
                 <div class="flex items-center space-x-3 cursor-pointer" onclick="scrollToSection('hero')">
                     <div class="relative w-12 h-12 flex items-center justify-center rounded-full bg-nasa-red text-white font-black text-xl tracking-tighter shadow-lg shadow-nasa-red/50">
                         NASA
@@ -97,7 +92,6 @@
                     </div>
                 </div>
 
-                <!-- Desktop Nav -->
                 <nav class="hidden md:flex space-x-6 font-mono text-sm uppercase tracking-wider">
                     <a href="#solar-system" class="text-gray-300 hover:text-nasa-blue transition-colors flex items-center gap-1"><i class="fa-solid fa-globe text-xs"></i> Tata Surya</a>
                     <a href="#apod" class="text-gray-300 hover:text-nasa-blue transition-colors flex items-center gap-1"><i class="fa-solid fa-image text-xs"></i> APOD</a>
@@ -106,7 +100,6 @@
                     <a href="#audio-space" class="text-gray-300 hover:text-nasa-blue transition-colors flex items-center gap-1"><i class="fa-solid fa-headphones text-xs"></i> Audio Space</a>
                 </nav>
 
-                <!-- Status & Search -->
                 <div class="flex items-center space-x-4">
                     <div class="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 text-xs font-mono">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -115,7 +108,6 @@
                     <button onclick="toggleSearchModal()" class="p-2 text-gray-400 hover:text-nasa-blue transition-colors">
                         <i class="fa-solid fa-magnifying-glass text-lg"></i>
                     </button>
-                    <!-- Mobile Hamburger Menu Button -->
                     <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-gray-400 hover:text-white">
                         <i id="mobile-menu-icon" class="fa-solid fa-bars text-xl"></i>
                     </button>
@@ -123,7 +115,6 @@
             </div>
         </div>
 
-        <!-- Mobile Menu Dropdown -->
         <div id="mobile-menu" class="hidden md:hidden glass border-t border-gray-800 px-4 pt-2 pb-4 space-y-3 font-mono text-sm">
             <a href="#solar-system" onclick="toggleMobileMenu()" class="block py-2 text-gray-300 hover:text-nasa-blue"><i class="fa-solid fa-globe mr-2"></i> Tata Surya</a>
             <a href="#apod" onclick="toggleMobileMenu()" class="block py-2 text-gray-300 hover:text-nasa-blue"><i class="fa-solid fa-image mr-2"></i> APOD</a>
@@ -147,7 +138,6 @@
             </h1>
             
             <p id="hero-typing" class="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto font-mono h-16 leading-relaxed mb-8">
-                <!-- Text typed by JS -->
             </p>
 
             <div class="flex flex-wrap justify-center gap-4 mb-16">
